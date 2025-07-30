@@ -45,6 +45,3 @@ chromedriver*
 floor_plans.json
 floor_plans.md
 debug_page_source.html
-
-# secrets
-config.py

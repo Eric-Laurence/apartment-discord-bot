@@ -44,6 +44,8 @@ PING_USERS should be comma-separated user ids, no spaces
 
 ### Step 4: Install stuff
 ```bash
+python3 -m venv env-scrape
+source env-scrape/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -60,7 +62,7 @@ Set up a cron job to run it every 10 minutes:
 ```bash
 crontab -e
 # Add this line:
-*/10 * * * * cd /path/to/your/apartment-monitor && python3 run_monitor.py
+*/10 * * * * cd /path/to/your/apartment-monitor && source env-scrape && python3 run_monitor.py
 ```
 
 ## Command line options
