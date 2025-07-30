@@ -1,0 +1,50 @@
+.env
+
+# generic python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# venv
+venv/
+env/
+ENV/
+env-crawl/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# browser
+chromedriver*
+
+# data
+floor_plans.json
+floor_plans.md
+debug_page_source.html
+
+# secrets
+config.py
