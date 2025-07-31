@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+import shutil
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -32,34 +33,51 @@ def setup_driver():
     chrome_options.add_argument(f"--window-size={WINDOW_SIZE}")
 
     driver = None
+   
+    # weird hack that ai suggested for getting
+    # it to work on a raspberry pi:
+
+    # try system chromedriver first
+    system_chromedriver = shutil.which('chromedriver')
+    if system_chromedriver:
+        try:
+            driver = webdriver.Chrome(
+                service=Service(system_chromedriver),
+                options=chrome_options
+            )
+            print(f"Using system ChromeDriver at {system_chromedriver}")
+        except Exception as e:
+            print(f"System ChromeDriver failed: {str(e)[:100]}...")
     
-    # try chromium and then chrome
-    try:
-        # weird hack suggested by ai
+    # and webdriver-manager if that doesn't work
+    if driver is None:
+        # try chromium first
         try:
-            from webdriver_manager.core.utils import ChromeType
-            driver = webdriver.Chrome(
-                service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
-                options=chrome_options
-            )
-        except ImportError:
-            driver = webdriver.Chrome(
-                service=Service(ChromeDriverManager(chrome_type="chromium").install()),
-                options=chrome_options
-            )
-        print("Using Chromium browser")
-    except Exception as e:
-        print(f"Chromium not available: {str(e)[:100]}...")
-        
-        try:
-            driver = webdriver.Chrome(
-                service=Service(ChromeDriverManager().install()),
-                options=chrome_options
-            )
-            print("Using Chrome browser")
-        except Exception as e2:
-            print(f"Chrome not available: {str(e2)[:100]}...")
-            raise Exception("Neither Chromium nor Chrome browser could be started. Please install one of them.")
+            try:
+                from webdriver_manager.core.utils import ChromeType
+                driver = webdriver.Chrome(
+                    service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
+                    options=chrome_options
+                )
+            except ImportError:
+                driver = webdriver.Chrome(
+                    service=Service(ChromeDriverManager(chrome_type="chromium").install()),
+                    options=chrome_options
+                )
+            print("Using Chromium browser (webdriver-manager)")
+        except Exception as e:
+            print(f"Chromium not available: {str(e)[:100]}...")
+            
+            # and chrome if that doesnt work
+            try:
+                driver = webdriver.Chrome(
+                    service=Service(ChromeDriverManager().install()),
+                    options=chrome_options
+                )
+                print("Using Chrome browser (webdriver-manager)")
+            except Exception as e2:
+                print(f"Chrome not available: {str(e2)[:100]}...")
+                raise Exception("No working browser found. Install Chrome, Chromium, or system ChromeDriver.")
     
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     return driver
