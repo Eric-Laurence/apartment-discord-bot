@@ -31,10 +31,35 @@ def setup_driver():
     
     chrome_options.add_argument(f"--window-size={WINDOW_SIZE}")
 
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
-    )
+    driver = None
+    
+    # try chromium and then chrome
+    try:
+        # weird hack suggested by ai
+        try:
+            from webdriver_manager.core.utils import ChromeType
+            driver = webdriver.Chrome(
+                service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
+                options=chrome_options
+            )
+        except ImportError:
+            driver = webdriver.Chrome(
+                service=Service(ChromeDriverManager(chrome_type="chromium").install()),
+                options=chrome_options
+            )
+        print("Using Chromium browser")
+    except Exception as e:
+        print(f"Chromium not available: {str(e)[:100]}...")
+        
+        try:
+            driver = webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()),
+                options=chrome_options
+            )
+            print("Using Chrome browser")
+        except Exception as e2:
+            print(f"Chrome not available: {str(e2)[:100]}...")
+            raise Exception("Neither Chromium nor Chrome browser could be started. Please install one of them.")
     
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     return driver
